@@ -1,22 +1,15 @@
-CREATE TABLE application (
-    id BIGSERIAL PRIMARY KEY,
-    job_id BIGINT NOT NULL,
-    candidate_id BIGINT NOT NULL,
-    status TEXT,
+ALTER TABLE application
+ADD COLUMN created_at TIMESTAMP,
+ADD COLUMN created_by TEXT,
+ADD COLUMN modified_at TIMESTAMP,
+ADD COLUMN modified_by TEXT;
 
-    created_at TIMESTAMP,
-    created_by TEXT,
-    modified_at TIMESTAMP,
-    modified_by TEXT,
+ALTER TABLE application
+ALTER COLUMN job_id SET NOT NULL;
 
-    CONSTRAINT fk_application_job
-        FOREIGN KEY (job_id)
-        REFERENCES job(id),
+ALTER TABLE application
+ALTER COLUMN candidate_id SET NOT NULL;
 
-    CONSTRAINT fk_application_candidate
-        FOREIGN KEY (candidate_id)
-        REFERENCES candidate(id),
-
-    CONSTRAINT uk_application_job_candidate
-        UNIQUE (job_id, candidate_id)
-);
+ALTER TABLE application
+ADD CONSTRAINT uk_application_job_candidate
+UNIQUE (job_id, candidate_id);

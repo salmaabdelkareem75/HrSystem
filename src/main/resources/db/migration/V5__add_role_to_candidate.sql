@@ -1,0 +1,9 @@
+ALTER TABLE candidate
+ADD COLUMN role VARCHAR(50);
+
+UPDATE candidate
+SET role = 'CANDIDATE'
+WHERE role IS NULL;
+
+ALTER TABLE candidate
+ALTER COLUMN role SET NOT NULL;

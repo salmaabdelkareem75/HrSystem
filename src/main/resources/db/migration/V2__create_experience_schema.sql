@@ -7,6 +7,7 @@ CREATE TABLE experience (
     CONSTRAINT fk_experience_candidate
         FOREIGN KEY (candidate_id)
         REFERENCES candidate(id)
-    ALTER TABLE candidate
-    DROP COLUMN experience;
 );
+
+ALTER TABLE candidate
+DROP COLUMN experience;

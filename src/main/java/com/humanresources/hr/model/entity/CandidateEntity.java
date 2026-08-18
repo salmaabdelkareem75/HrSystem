@@ -47,4 +47,7 @@ public class CandidateEntity extends BaseEntity {
     private String education;
 
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

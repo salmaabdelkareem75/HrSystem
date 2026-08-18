@@ -117,10 +117,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                 );
 
         CandidateEntity candidate = candidateRepository
-                .findById(20L)
+                .findById(request.getCandidateId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Candidate not found with id: 20"
+                                "Candidate not found with id: "
+                                        + request.getCandidateId()
                         )
                 );
 
@@ -146,10 +147,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                 );
 
         CandidateEntity candidate = candidateRepository
-                .findById(20L)
+                .findById(request.getCandidateId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Candidate not found with id: 20"
+                                "Candidate not found with id: "
+                                        + request.getCandidateId()
                         )
                 );
 

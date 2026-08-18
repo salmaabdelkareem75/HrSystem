@@ -1,21 +1,30 @@
 package com.humanresources.hr.service.Impi;
+
+import com.humanresources.hr.exception.DuplicateResourceException;
+import com.humanresources.hr.exception.ResourceNotFoundException;
 import com.humanresources.hr.model.dto.CandidateRequestDto;
 import com.humanresources.hr.model.dto.CandidateResponseDto;
 import com.humanresources.hr.model.entity.CandidateEntity;
+import com.humanresources.hr.model.entity.Role;
 import com.humanresources.hr.repository.CandidateRepository;
 import com.humanresources.hr.service.CandidateService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.humanresources.hr.exception.ResourceNotFoundException;
-import com.humanresources.hr.exception.DuplicateResourceException;
+
 import java.util.List;
 
 @Service
 public class CandidateServiceImpl implements CandidateService {
 
     private final CandidateRepository candidateRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CandidateServiceImpl(CandidateRepository candidateRepository) {
+    public CandidateServiceImpl(
+            CandidateRepository candidateRepository,
+            PasswordEncoder passwordEncoder) {
+
         this.candidateRepository = candidateRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -73,6 +82,7 @@ public class CandidateServiceImpl implements CandidateService {
 
         if (!existingCandidate.getEmail().equals(request.getEmail())
                 && candidateRepository.existsByEmail(request.getEmail())) {
+
             throw new DuplicateResourceException(
                     "Candidate with email " + request.getEmail() + " already exists"
             );
@@ -114,7 +124,12 @@ public class CandidateServiceImpl implements CandidateService {
         candidate.setTechnicalSkills(request.getTechnicalSkills());
         candidate.setSummary(request.getSummary());
         candidate.setEducation(request.getEducation());
-        candidate.setPassword(request.getPassword());
+
+        candidate.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        candidate.setRole(Role.CANDIDATE);
     }
 
     private CandidateResponseDto mapToResponse(
