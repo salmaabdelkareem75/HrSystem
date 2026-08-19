@@ -56,11 +56,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // ============ AUTH ============
+
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register"
                         )
                         .permitAll()
+
+
+                        // ============ CANDIDATES ============
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -78,7 +83,11 @@ public class SecurityConfig {
                                 HttpMethod.GET,
                                 "/candidates/{id}"
                         )
-                        .hasAnyRole("ADMIN", "HR", "CANDIDATE")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "CANDIDATE"
+                        )
 
                         .requestMatchers(
                                 HttpMethod.PUT,
@@ -91,6 +100,85 @@ public class SecurityConfig {
                                 "/candidates/{id}"
                         )
                         .hasRole("CANDIDATE")
+
+
+                        // ============ JOBS ============
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/jobs"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "CANDIDATE"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/jobs/{id}"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "CANDIDATE"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/jobs"
+                        )
+                        .hasRole("HR")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/jobs/{id}"
+                        )
+                        .hasRole("HR")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/jobs/{id}"
+                        )
+                        .hasRole("HR")
+
+
+                        // ============ APPLICATIONS ============
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/applications"
+                        )
+                        .hasAnyRole("ADMIN", "HR")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/applications/{id}"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "HR",
+                                "CANDIDATE"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/applications"
+                        )
+                        .hasRole("CANDIDATE")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/applications/{id}"
+                        )
+                        .hasRole("CANDIDATE")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/applications/{id}"
+                        )
+                        .hasRole("CANDIDATE")
+
 
                         .anyRequest().authenticated()
                 )

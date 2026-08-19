@@ -11,9 +11,12 @@ public interface ApplicationService {
 
     ApplicationResponseDto getApplicationById(Long id);
 
-    ApplicationResponseDto saveApplication(ApplicationRequestDto request);
+    ApplicationResponseDto saveApplication(
+            ApplicationRequestDto request);
 
-    ApplicationResponseDto updateApplication(Long id, ApplicationRequestDto request);
+    ApplicationResponseDto updateApplication(
+            Long id,
+            ApplicationRequestDto request);
 
     void withdrawApplication(Long id);
 }

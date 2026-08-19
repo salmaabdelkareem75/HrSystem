@@ -10,6 +10,8 @@ import com.humanresources.hr.repository.ApplicationRepository;
 import com.humanresources.hr.repository.CandidateRepository;
 import com.humanresources.hr.repository.JobRepository;
 import com.humanresources.hr.service.ApplicationService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,13 +45,29 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationResponseDto getApplicationById(Long id) {
 
-        ApplicationEntity application =
-                applicationRepository.findById(id)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Application not found with id: " + id
-                                )
-                        );
+        ApplicationEntity application;
+
+        if (isCandidate()) {
+
+            String email = getCurrentUserEmail();
+
+            application = applicationRepository
+                    .findByIdAndCandidateEmail(id, email)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Application not found or you do not have access to it"
+                            )
+                    );
+
+        } else {
+
+            application = applicationRepository.findById(id)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Application not found with id: " + id
+                            )
+                    );
+        }
 
         return mapToResponse(application);
     }
@@ -58,8 +76,29 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponseDto saveApplication(
             ApplicationRequestDto request) {
 
-        ApplicationEntity application = mapToEntity(request);
+        JobEntity job = jobRepository.findById(request.getJobId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job not found with id: "
+                                        + request.getJobId()
+                        )
+                );
 
+        String email = getCurrentUserEmail();
+
+        CandidateEntity candidate = candidateRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Candidate not found with email: " + email
+                        )
+                );
+
+        ApplicationEntity application =
+                new ApplicationEntity();
+
+        application.setJob(job);
+        application.setCandidate(candidate);
         application.setStatus("PENDING");
 
         ApplicationEntity savedApplication =
@@ -73,15 +112,26 @@ public class ApplicationServiceImpl implements ApplicationService {
             Long id,
             ApplicationRequestDto request) {
 
+        String email = getCurrentUserEmail();
+
         ApplicationEntity application =
-                applicationRepository.findById(id)
+                applicationRepository
+                        .findByIdAndCandidateEmail(id, email)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Application not found with id: " + id
+                                        "Application not found or you do not have access to it"
                                 )
                         );
 
-        updateApplicationData(application, request);
+        JobEntity job = jobRepository.findById(request.getJobId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job not found with id: "
+                                        + request.getJobId()
+                        )
+                );
+
+        application.setJob(job);
 
         ApplicationEntity updatedApplication =
                 applicationRepository.save(application);
@@ -92,11 +142,14 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void withdrawApplication(Long id) {
 
+        String email = getCurrentUserEmail();
+
         ApplicationEntity application =
-                applicationRepository.findById(id)
+                applicationRepository
+                        .findByIdAndCandidateEmail(id, email)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Application not found with id: " + id
+                                        "Application not found or you do not have access to it"
                                 )
                         );
 
@@ -105,58 +158,28 @@ public class ApplicationServiceImpl implements ApplicationService {
         applicationRepository.save(application);
     }
 
-    private ApplicationEntity mapToEntity(
-            ApplicationRequestDto request) {
+    private String getCurrentUserEmail() {
 
-        JobEntity job = jobRepository.findById(request.getJobId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job not found with id: "
-                                        + request.getJobId()
-                        )
-                );
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
 
-        CandidateEntity candidate = candidateRepository
-                .findById(request.getCandidateId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Candidate not found with id: "
-                                        + request.getCandidateId()
-                        )
-                );
-
-        ApplicationEntity application =
-                new ApplicationEntity();
-
-        application.setJob(job);
-        application.setCandidate(candidate);
-
-        return application;
+        return authentication.getName();
     }
 
-    private void updateApplicationData(
-            ApplicationEntity application,
-            ApplicationRequestDto request) {
+    private boolean isCandidate() {
 
-        JobEntity job = jobRepository.findById(request.getJobId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job not found with id: "
-                                        + request.getJobId()
-                        )
-                );
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
 
-        CandidateEntity candidate = candidateRepository
-                .findById(request.getCandidateId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Candidate not found with id: "
-                                        + request.getCandidateId()
-                        )
-                );
-
-        application.setJob(job);
-        application.setCandidate(candidate);
+        return authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_CANDIDATE"));
     }
 
     private ApplicationResponseDto mapToResponse(
@@ -167,7 +190,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         response.setId(application.getId());
         response.setJobId(application.getJob().getId());
-        response.setCandidateId(application.getCandidate().getId());
+        response.setCandidateId(
+                application.getCandidate().getId()
+        );
         response.setStatus(application.getStatus());
 
         return response;

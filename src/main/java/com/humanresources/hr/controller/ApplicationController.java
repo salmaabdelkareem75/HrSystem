@@ -1,7 +1,9 @@
 package com.humanresources.hr.controller;
+
 import com.humanresources.hr.model.dto.ApplicationRequestDto;
 import com.humanresources.hr.model.dto.ApplicationResponseDto;
 import com.humanresources.hr.service.ApplicationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +16,15 @@ class ApplicationController {
 
     private final ApplicationService applicationService;
 
-    public ApplicationController(ApplicationService applicationService) {
+    public ApplicationController(
+            ApplicationService applicationService) {
+
         this.applicationService = applicationService;
     }
 
     @GetMapping
     ResponseEntity<List<ApplicationResponseDto>> getAllApplications() {
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(applicationService.getAllApplications());
@@ -36,7 +41,7 @@ class ApplicationController {
 
     @PostMapping
     ResponseEntity<ApplicationResponseDto> createApplication(
-            @RequestBody ApplicationRequestDto request) {
+            @Valid @RequestBody ApplicationRequestDto request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -46,15 +51,18 @@ class ApplicationController {
     @PutMapping("/{id}")
     ResponseEntity<ApplicationResponseDto> updateApplication(
             @PathVariable Long id,
-            @RequestBody ApplicationRequestDto request) {
+            @Valid @RequestBody ApplicationRequestDto request) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(applicationService.updateApplication(id, request));
+                .body(applicationService.updateApplication(
+                        id,
+                        request
+                ));
     }
 
-    @PatchMapping("/{id}/withdraw")
-    ResponseEntity<Void> withdrawApplication(
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteApplication(
             @PathVariable Long id) {
 
         applicationService.withdrawApplication(id);
@@ -64,4 +72,3 @@ class ApplicationController {
                 .build();
     }
 }
-
