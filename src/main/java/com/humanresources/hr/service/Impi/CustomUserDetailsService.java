@@ -1,4 +1,4 @@
-package com.humanresources.hr.service;
+package com.humanresources.hr.service.Impi;
 
 import com.humanresources.hr.model.entity.CandidateEntity;
 import com.humanresources.hr.repository.CandidateRepository;
@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.humanresources.hr.users.StaticUsers;
-import com.humanresources.hr.users.Users;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

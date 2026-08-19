@@ -1,15 +1,15 @@
 package com.humanresources.hr.config;
 
 import com.humanresources.hr.security.JwtAuthenticationFilter;
-import com.humanresources.hr.service.CustomUserDetailsService;
+import com.humanresources.hr.service.Impi.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,10 +28,9 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    @SuppressWarnings("deprecation")
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -56,10 +55,43 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(
-                                "/auth/login"
+                                "/auth/login",
+                                "/auth/register"
                         )
                         .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/candidates"
+                        )
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/candidates"
+                        )
+                        .hasAnyRole("ADMIN", "HR")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/candidates/{id}"
+                        )
+                        .hasAnyRole("ADMIN", "HR", "CANDIDATE")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/candidates/{id}"
+                        )
+                        .hasRole("CANDIDATE")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/candidates/{id}"
+                        )
+                        .hasRole("CANDIDATE")
+
                         .anyRequest().authenticated()
                 )
 

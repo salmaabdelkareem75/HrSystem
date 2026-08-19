@@ -1,6 +1,6 @@
 package com.humanresources.hr.security;
 
-import com.humanresources.hr.service.CustomUserDetailsService;
+import com.humanresources.hr.service.Impi.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,12 +54,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+
         if (email != null
                 && SecurityContextHolder.getContext()
                 .getAuthentication() == null) {
 
             UserDetails userDetails =
                     userDetailsService.loadUserByUsername(email);
+
+            System.out.println("EMAIL = " + email);
+            System.out.println("AUTHORITIES = " + userDetails.getAuthorities());
+            System.out.println("TOKEN ROLE = " + jwtService.extractRole(token));
 
             if (jwtService.isTokenValid(token, email)) {
 

@@ -42,5 +42,6 @@ public class CandidateResponseDto {
     private String modifiedBy;
 
     public void setExperience(List<ExperienceEntity> experiences) {
+        this.experience = experiences;
     }
 }

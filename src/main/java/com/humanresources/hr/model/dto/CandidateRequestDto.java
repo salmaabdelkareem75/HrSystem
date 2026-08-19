@@ -50,7 +50,4 @@ public class CandidateRequestDto {
     @NotBlank
     private String education;
 
-    @NotBlank
-    @Size(min = 8, max = 25, message = "Password must be at least 8 characters")
-    private String password;
 }
